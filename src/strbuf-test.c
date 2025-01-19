@@ -35,14 +35,15 @@ static MunitResult test_add(
         NULL,
     };
 
-    for (char *line = lines[0]; *line; line++) {
-        strbuf_add(&s, line);
+    for (int i = 0; lines[i]; i++) {
+        strbuf_add(&s, lines[i]);
     }
 
     for (int i = 0; i < s.num; i++) {
         munit_assert(strcmp(s.s[i], lines[i]) == 0);
     }
-    munit_assert_int(s.num, ==, 4);
+    /*printf("test_add: s.num %d\n", s.num);*/
+    munit_assert_int(s.num, ==, 5);
 
     strbuf_shutdown(&s);
     return MUNIT_OK;
@@ -57,9 +58,11 @@ static MunitResult test_addf(
     strbuf_addf(&s, "%d", -1);
     strbuf_addf(&s, "her %d", 9);
 
+    /*
     for (int i = 0; i < s.num; i++) {
         printf("'%s'\n", s.s[i]);
     }
+    */
 
     munit_assert_not_null(s.s);
     munit_assert(strcmp(s.s[0], "0") == 0);
@@ -74,6 +77,7 @@ static MunitResult test_addf(
 static MunitResult test_concat(
     const MunitParameter params[], void* data
 ) {
+    //printf("test_concat:\n");
     StrBuf s = strbuf_init(NULL);
 
     strbuf_add(&s, "1");

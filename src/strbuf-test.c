@@ -77,22 +77,44 @@ static MunitResult test_addf(
 static MunitResult test_concat(
     const MunitParameter params[], void* data
 ) {
-    //printf("test_concat:\n");
-    StrBuf s = strbuf_init(NULL);
 
-    strbuf_add(&s, "1");
-    strbuf_add(&s, "2");
-    strbuf_add(&s, "3");
-    strbuf_add(&s, "4");
-    strbuf_add(&s, "5");
+    {
+        StrBuf s = strbuf_init(NULL);
 
-    char *line = strbuf_concat_alloc(&s);
-    munit_assert_not_null(line);
+        strbuf_add(&s, "1");
+        strbuf_add(&s, "2");
+        strbuf_add(&s, "3");
+        strbuf_add(&s, "4");
+        strbuf_add(&s, "5");
 
-    munit_assert(strcmp(line, "12345") == 0);
+        char *line = strbuf_concat_alloc(&s, NULL);
+        munit_assert_not_null(line);
 
-    free(line);
-    strbuf_shutdown(&s);
+        munit_assert(strcmp(line, "12345") == 0);
+
+        free(line);
+        strbuf_shutdown(&s);
+    }
+
+    {
+        StrBuf s = strbuf_init(NULL);
+
+        strbuf_add(&s, "1");
+        strbuf_add(&s, "2");
+        strbuf_add(&s, "3");
+        strbuf_add(&s, "4");
+        strbuf_add(&s, "5");
+
+        char *line = strbuf_concat_alloc(&s, " ");
+        munit_assert_not_null(line);
+
+        printf("line '%s'\n", line);
+        munit_assert(strcmp(line, "1 2 3 4 5") == 0);
+
+        free(line);
+        strbuf_shutdown(&s);
+    }
+
     return MUNIT_OK;
 }
 

@@ -49,6 +49,34 @@ static MunitResult test_add(
     return MUNIT_OK;
 }
 
+static MunitResult test_first_last(
+    const MunitParameter params[], void* data
+) {
+    StrBuf s = strbuf_init(NULL);
+
+    munit_assert(strbuf_first(&s) == NULL);
+    munit_assert(strbuf_last(&s) == NULL);
+
+    strbuf_add(&s, "1");
+
+    munit_assert(strcmp(strbuf_first(&s), "1") == 0);
+    munit_assert(strcmp(strbuf_last(&s), "1") == 0);
+
+    strbuf_add(&s, "2");
+
+    munit_assert(strcmp(strbuf_first(&s), "1") == 0);
+    munit_assert(strcmp(strbuf_last(&s), "2") == 0);
+
+    strbuf_add(&s, "3");
+
+    munit_assert(strcmp(strbuf_first(&s), "1") == 0);
+    munit_assert(strcmp(strbuf_last(&s), "3") == 0);
+
+    strbuf_shutdown(&s);
+
+    return MUNIT_OK;
+}
+
 static MunitResult test_addf(
     const MunitParameter params[], void* data
 ) {
@@ -119,6 +147,15 @@ static MunitResult test_concat(
 }
 
 static MunitTest test_suite_tests[] = {
+
+    {
+        "/test_first_last",
+        test_first_last,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
 
     {
         "/test_addf",

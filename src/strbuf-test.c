@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <memory.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,6 +147,61 @@ static MunitResult test_concat(
     return MUNIT_OK;
 }
 
+// strbuf_clear — очистка без освобождения памяти
+static MunitResult test_clear(
+    const MunitParameter params[], void* data
+) {
+    StrBuf s = strbuf_init(NULL);
+
+    strbuf_add(&s, "a");
+    strbuf_add(&s, "b");
+    strbuf_add(&s, "c");
+    munit_assert_int(s.num, ==, 3);
+    munit_assert_not_null(s.s);
+
+    strbuf_clear(&s);
+    munit_assert_int(s.num, ==, 0);
+    munit_assert_null(strbuf_first(&s));
+    munit_assert_null(strbuf_last(&s));
+
+    strbuf_add(&s, "x");
+    strbuf_add(&s, "y");
+    munit_assert_int(s.num, ==, 2);
+    munit_assert(strcmp(strbuf_first(&s), "x") == 0);
+    munit_assert(strcmp(strbuf_last(&s), "y") == 0);
+
+    strbuf_shutdown(&s);
+    return MUNIT_OK;
+}
+
+// Обёртка для проверки strbuf_add_va
+static void _add_va_wrap(StrBuf *s, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    strbuf_add_va(s, fmt, ap);
+    va_end(ap);
+}
+
+// strbuf_add_va — форматирование из va_list
+static MunitResult test_add_va(
+    const MunitParameter params[], void* data
+) {
+    StrBuf s = strbuf_init(NULL);
+
+    _add_va_wrap(&s, "%d", 42);
+    _add_va_wrap(&s, "%s %d", "line", 7);
+    _add_va_wrap(&s, "%.2f", 3.14f);
+
+    munit_assert_int(s.num, ==, 3);
+    munit_assert(strcmp(s.s[0], "42") == 0);
+    munit_assert(strcmp(s.s[1], "line 7") == 0);
+    munit_assert(strcmp(s.s[2], "3.14") == 0);
+    munit_assert_null(s.s[3]);
+
+    strbuf_shutdown(&s);
+    return MUNIT_OK;
+}
+
 static MunitTest test_suite_tests[] = {
 
     {
@@ -188,6 +244,24 @@ static MunitTest test_suite_tests[] = {
     {
         "/test_init_shutdown",
         test_init_shutdown,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
+
+    {
+        "/test_clear",
+        test_clear,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
+
+    {
+        "/test_add_va",
+        test_add_va,
         NULL,
         NULL,
         MUNIT_TEST_OPTION_NONE,
